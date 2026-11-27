@@ -1,25 +1,58 @@
 `default_nettype none
-`timescale 1ns / 1ps
-module tb;
-    reg clk, rst_n, ena;
-    reg [7:0] ui_in, uio_in;
-    wire [7:0] uo_out, uio_out, uio_oe;
-`ifdef GL_TEST
-    wire VPWR = 1'b1;
-    wire VGND = 1'b0;
-`endif
+`timescale 1ns/1ps
+
+module testbench;
+  reg clk;
+  reg rst;
+  reg signed [31:0] deltaD;   
+  wire signed [31:0] ffy;
+  wire signed [31:0] fry;
+  wire signed [31:0] vy;
+  wire signed [31:0] wz;
+  wire signed [31:0] alphaf;
+  wire signed [31:0] alphar;
+
+  proyect uut(
+    .rst(rst),
+    .clk(clk),
+    .deltaD(deltaD),
+    .ffy(ffy),
+    .fry(fry),
+    .vy(vy),
+    .wz(wz),
+    .alphaf(alphaf),
+    .alphar(alphar)
+  );
+
+  // Generación de reloj 100 MHz → periodo 10 ns
+  always #1 clk = ~clk;
+
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(1,testbench);
+  end
+  
     initial begin
-        $dumpfile("tb.fst");
-        $dumpvars(0, tb);
-    end
-    // Cocotb genera reloj, reset y estimulos.
-    tt_um_charly2423_proyect user_project (
-`ifdef GL_TEST
-        .VPWR(VPWR), .VGND(VGND),
-`endif
-        .clk(clk), .rst_n(rst_n), .ena(ena),
-        .ui_in(ui_in), .uo_out(uo_out),
-        .uio_in(uio_in), .uio_out(uio_out), .uio_oe(uio_oe)
+      // Inicialización
+      clk = 0;
+      rst = 1;
+      deltaD = 0;
+      
+      #20 rst = 0;
+
+      // Aplicar escalón de 0.043 rad en Q19.13
+      #6000 deltaD = 32'sd352;
+
+    // Finalizar simulación
+ 	#3000 $finish;
+  end
+  
+  always @(posedge clk) begin
+    $display("%0t %.4f %.4f %.4f ",  //t  delta vy  wz
+      $time,
+      $itor(deltaD)/8192.0,
+      $itor(vy)/8192.0,
+      $itor(wz)/8192.0,
     );
+  end
 endmodule
-`default_nettype wire
