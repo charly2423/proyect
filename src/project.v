@@ -4,8 +4,9 @@
  */
 
 `default_nettype none
+`timescale 1ns/1ps
 
-module proyect #(
+module tt_um_proyect #(
   //parameter WIDTH = 1       // ancho de bits
   parameter T_GAIN = 3.5     // constante de integración (T)
 )(
@@ -20,7 +21,7 @@ module proyect #(
   output signed [31:0] alphar   
 );
 
-  // All output pins must be assigned. If not used, assign to 0.
+  
   // CONSTANTES (multiplicadas por 2^13 = 8192)
   localparam signed [31:0] VX       = -28      * 8192;  // -229376
   localparam signed [31:0] VX_POS   =  28      * 8192;  // 229376
@@ -77,3 +78,4 @@ module proyect #(
   assign ffy = (CF * alphaf) >>> 13;
   assign fry = (CR * alphar) >>> 13;
 endmodule
+
